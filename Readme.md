@@ -117,5 +117,13 @@ This project was developed with passion and dedication by:
 -  **GitHub:** [0YogeshKumar](https://github.com/0YogeshKumar/)
 -  **LinkedIn:** [Yogesh Kumar H Mutt S](https://www.linkedin.com/in/yogesh-kumar-h-mutt-s-6b858b382/)
 
+| Info     | Developers            |                   | 
+| :------- | :-------------------- | :---------------- |
+| Name     | Yogesh Kumar H Mutt S | Vaibhava Rathna V |
+| Email ID | ykhmutt0804@gmail.com | vaibhavarathna123@gmail.com |
+| GitHub   | [0YogeshKumar](https://github.com/0YogeshKumar/)| [Vaibhavarathna123](https://github.com/vaibhavarathna123/) |
+| LinkdIn  | [Yogesh Kumar H Mutt S](https://www.linkedin.com/in/yogesh-kumar-h-mutt-s-6b858b382/) | [Yogesh Kumar H Mutt S](http://linkedin.com/in/vaibhava-rathna-v-041097230/) |
+
+
 ## 📜 License
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
