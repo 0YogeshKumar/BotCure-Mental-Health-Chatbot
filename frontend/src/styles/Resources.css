@@ -1,0 +1,76 @@
+.resources-panel {
+    width: 320px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border-dark);
+    padding: 1.5rem;
+    overflow-y: auto;
+    height: 100vh;
+    box-sizing: border-box;
+}
+body.light .resources-panel { border-left: 1px solid var(--border-light); }
+
+.resources-panel h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary-dark);
+}
+body.light .resources-panel h2 { color: var(--text-primary-light); }
+
+.resources-panel p {
+    color: var(--text-secondary-dark);
+    font-size: 0.9rem;
+}
+body.light .resources-panel p { color: var(--text-secondary-light); }
+
+.resource-section { margin-bottom: 2rem; }
+.resource-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--primary-color-dark);
+}
+body.light .resource-section h3 { color: var(--primary-color-light); }
+
+.resource-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    background-color: var(--panel-bg-dark);
+    border: 1px solid var(--border-dark);
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+body.light .resource-item { background-color: var(--panel-bg-light); border: 1px solid var(--border-light); }
+
+.resource-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: var(--primary-color-dark);
+}
+body.light .resource-item:hover { background-color: #f8f9fa; border-color: var(--primary-color-light); }
+
+.resource-item .icon {
+    font-size: 1.5rem;
+    margin-top: 4px;
+    color: var(--text-secondary-dark);
+}
+.resource-item .icon.youtube { color: #ff0000; }
+body.light .resource-item .icon { color: var(--text-secondary-light); }
+
+.resource-item .text-content {
+    color: inherit;
+}
+.resource-item h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+    color: var(--text-primary-dark);
+}
+body.light .resource-item h4 { color: var(--text-primary-light); }
+.resource-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary-dark);
+    line-height: 1.5;
+}
+body.light .resource-item p { color: var(--text-secondary-light); }
+

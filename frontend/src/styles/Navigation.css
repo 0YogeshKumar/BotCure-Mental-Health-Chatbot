@@ -1,0 +1,81 @@
+/* --- Main Navigation Panel --- */
+.navigation-panel {
+    background-color: var(--panel-bg-dark);
+    border-right: 1px solid var(--border-dark);
+    padding: 1rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    box-sizing: border-box;
+    width: 68px; /* Collapsed width */
+    transition: width 0.3s ease;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.navigation-panel.expanded { width: 280px; }
+body.light .navigation-panel { background-color: var(--panel-bg-light); border-right: 1px solid var(--border-light); }
+
+.nav-top, .nav-bottom { display: flex; flex-direction: column; }
+.nav-top { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* --- Logo & Pin Button --- */
+.logo-container { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; margin-bottom: 1rem; cursor: pointer; min-width: 250px; }
+.logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
+.logo-text { font-size: 1.8rem; font-weight: 700; color: var(--primary-color-dark); white-space: nowrap; opacity: 0; transition: opacity 0.2s; }
+.navigation-panel.expanded .logo-text { opacity: 1; }
+body.light .logo-text { color: var(--primary-color-light); }
+
+.pin-btn {
+    margin-left: auto; background: none; border: none; font-size: 1.1rem; color: var(--text-secondary-dark); cursor: pointer;
+    padding: 0.5rem; border-radius: 6px; transition: opacity 0.2s, background-color 0.2s;
+    opacity: 0; /* Hidden by default */
+}
+/* Show pin button on hover or if expanded */
+.navigation-panel:hover .pin-btn, .navigation-panel.expanded .pin-btn { opacity: 1; }
+
+.pin-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+.navigation-panel.expanded .pin-btn { opacity: 1; }
+body.light .pin-btn { color: var(--text-secondary-light); }
+body.light .pin-btn:hover { background-color: #f0f4f8; }
+
+/* --- Text Styling for Expanded View --- */
+.btn-text, .link-text, .chat-title, .delete-btn {
+    opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; white-space: nowrap;
+}
+.navigation-panel.expanded .btn-text,
+.navigation-panel.expanded .link-text,
+.navigation-panel.expanded .chat-title,
+.navigation-panel.expanded .delete-btn { opacity: 1; visibility: visible; }
+
+/* --- New Chat & Nav Links --- */
+.new-chat-btn, .nav-link, .chat-item {
+    display: flex; align-items: center; gap: 0.9rem; padding: 0.8rem 1.1rem; border-radius: 8px;
+    font-size: 1rem; cursor: pointer; border: none; background: none; width: 100%;
+    text-align: left; transition: background-color 0.2s, color 0.2s; min-width: 250px; box-sizing: border-box;
+}
+.new-chat-btn { font-weight: 500; color: var(--text-primary-dark); border: 1px solid var(--border-dark); margin-bottom: 1rem; }
+body.light .new-chat-btn { color: var(--text-primary-light); border: 1px solid var(--border-light); }
+.new-chat-btn:hover { background-color: rgba(255, 255, 255, 0.05); }
+body.light .new-chat-btn:hover { background-color: #f0f4f8; }
+
+.nav-link { color: var(--text-secondary-dark); }
+body.light .nav-link { color: var(--text-secondary-light); }
+.nav-link:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary-dark); }
+body.light .nav-link:hover { background-color: #f0f4f8; color: var(--text-primary-light); }
+.nav-link.active { background-color: var(--primary-color-dark); color: #fff; }
+body.light .nav-link.active { background-color: var(--primary-color-light); color: #fff; }
+.logout-link:hover { background-color: #dc354520; color: #dc3545; }
+
+/* --- Chat History --- */
+.chat-list-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
+.chat-item { position: relative; }
+.chat-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+body.light .chat-item:hover { background-color: #f0f4f8; }
+.chat-item.active { background-color: var(--primary-color-dark); color: #fff; }
+body.light .chat-item.active { background-color: var(--primary-color-light); color: #fff; }
+.chat-title { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
+.delete-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary-dark); cursor: pointer; padding: 0.3rem; border-radius: 4px; transition: color 0.2s; }
+.chat-item.active .delete-btn, .chat-item.active:hover .delete-btn { color: #fff; }
+.delete-btn:hover { color: #f87171; }
+

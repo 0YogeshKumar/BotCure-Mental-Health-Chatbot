@@ -1,0 +1,205 @@
+/* --- General Game Page & Container Styles --- */
+.games-page, .game-container {
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    overflow-y: auto;
+}
+
+.games-page h2, .game-title {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.games-page p, .game-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    max-width: 400px;
+}
+
+.game-selection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.game-selection button, .reset-btn {
+    padding: 15px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.status {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* --- Dark Theme Default Styles --- */
+.games-page h2, .game-title { color: var(--primary-color-dark); }
+.games-page p, .game-subtitle, .status { color: var(--text-secondary-dark); }
+.game-selection button, .reset-btn { background-color: var(--primary-color-dark); color: #FFFFFF; }
+.back-btn { background-color: var(--panel-bg-dark); border: 1px solid var(--border-dark); color: var(--text-primary-dark); }
+
+/* --- Light Theme Overrides --- */
+body.light .games-page h2, body.light .game-title { color: var(--primary-color-light); }
+body.light .games-page p, body.light .game-subtitle, body.light .status { color: var(--text-secondary-light); }
+body.light .game-selection button, body.light .reset-btn { background-color: var(--primary-color-light); color: #FFFFFF; }
+body.light .back-btn { background-color: var(--panel-bg-light); border-color: var(--border-light); color: var(--text-primary-light); }
+
+
+/* --- Tic-Tac-Toe Specific Styles --- */
+.tictactoe .board {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tictactoe .board-row {
+    display: flex;
+    gap: 10px;
+}
+
+/* Dark Theme Default */
+.tictactoe .square {
+    width: 80px;
+    height: 80px;
+    background: var(--panel-bg-dark);
+    border: 2px solid var(--border-dark);
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text-primary-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.tictactoe .square:hover { background-color: #2a2a2a; }
+
+/* Light Theme Override */
+body.light .tictactoe .square {
+    background: var(--panel-bg-light);
+    border-color: var(--border-light);
+    color: var(--text-primary-light);
+}
+body.light .tictactoe .square:hover { background-color: #e9ecef; }
+
+
+/* --- Find The Pair Specific Styles (CORRECTED) --- */
+.memory-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; 
+    width: clamp(300px, 90vw, 400px); 
+    /* This ensures the grid is always a perfect square */
+    aspect-ratio: 1 / 1;
+}
+.card { 
+    background-color: transparent; 
+    perspective: 1000px; 
+    cursor: pointer; 
+}
+.card-inner { 
+    position: relative; 
+    width: 100%; 
+    height: 100%; 
+    transition: transform 0.6s; 
+    transform-style: preserve-3d; 
+}
+.card.flipped .card-inner { 
+    transform: rotateY(180deg); 
+}
+.card-front, .card-back { 
+    position: absolute; 
+    width: 100%; 
+    height: 100%; 
+    backface-visibility: hidden; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 10px; 
+}
+.card-back { 
+    font-size: clamp(1.5rem, 8vw, 2.5rem); 
+    transform: rotateY(180deg); 
+}
+
+/* Dark Theme */
+.card-front { 
+    background-color: var(--panel-bg-dark); 
+    border: 2px solid var(--border-dark); 
+}
+.card-back { 
+    background-color: var(--panel-bg-dark); 
+    border: 2px solid var(--primary-color-dark); 
+    color: var(--primary-color-dark); 
+}
+
+/* Light Theme */
+body.light .card-front { 
+    background-color: var(--panel-bg-light); 
+    border: 2px solid var(--border-light); 
+}
+body.light .card-back { 
+    background-color: var(--panel-bg-light); 
+    border: 2px solid var(--primary-color-light); 
+    color: var(--primary-color-light); 
+}
+
+
+/* --- Stress Buster Styles --- */
+.stress-buster .tool-selection { display: flex; gap: 15px; margin-bottom: 25px; }
+.stress-buster .tool-selection button { padding: 10px 20px; border-radius: 8px; font-weight: normal; }
+.buddy-area { position: relative; width: 200px; height: 240px; margin-bottom: 20px; cursor: pointer; }
+.buddy-svg { width: 100%; height: 100%; }
+.buddy-svg .buddy-body { transition: transform 0.3s ease-out; }
+.buddy-svg.hit .buddy-body-group { animation: recoil 0.3s ease-out; }
+@keyframes recoil { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(0, 5px) scale(0.98); } }
+.tool-animation { position: absolute; font-size: 4rem; pointer-events: none; z-index: 10; }
+.tool-animation.bat { top: 50%; left: -100px; animation: swing-bat 0.3s ease-out forwards; }
+.tool-animation.stone { top: 50%; left: -100px; animation: throw-stone 0.2s linear forwards; }
+.tool-animation.ball { top: 120%; left: 40%; animation: throw-ball 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards; }
+@keyframes swing-bat { 0% { transform: translateX(0) rotate(-45deg); opacity: 1; } 100% { transform: translateX(300px) rotate(45deg); opacity: 0; } }
+@keyframes throw-stone { 0% { transform: translateX(0) scale(1); opacity: 1; } 100% { transform: translateX(150px) scale(0.5); opacity: 0; } }
+@keyframes throw-ball { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-200px); opacity: 0; } }
+
+/* Dark Theme */
+.stress-buster .tool-selection button { background-color: var(--panel-bg-dark); border: 2px solid var(--border-dark); color: var(--text-primary-dark); }
+.stress-buster .tool-selection button.active { border-color: var(--primary-color-dark); color: var(--primary-color-dark); }
+.stress-buster .buddy-svg .buddy-body { fill: var(--primary-color-dark); }
+.stress-buster .buddy-svg .buddy-eyes, .stress-buster .buddy-svg .buddy-mouth { stroke: var(--bg-dark); }
+.stress-buster .buddy-svg .buddy-mouth-hit { fill: var(--bg-dark); }
+
+
+/* Light Theme */
+body.light .stress-buster .tool-selection button { background-color: var(--panel-bg-light); border-color: var(--border-light); color: var(--text-primary-light); }
+body.light .stress-buster .tool-selection button.active { border-color: var(--primary-color-light); color: var(--primary-color-light); }
+body.light .stress-buster .buddy-svg .buddy-body { fill: var(--primary-color-light); }
+body.light .stress-buster .buddy-svg .buddy-eyes, body.light .stress-buster .buddy-svg .buddy-mouth { stroke: var(--bg-light); }
+body.light .stress-buster .buddy-svg .buddy-mouth-hit { fill: var(--bg-light); }
+

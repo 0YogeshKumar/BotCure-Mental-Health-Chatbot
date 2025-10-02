@@ -1,0 +1,23 @@
+Dependencies
+/node_modules
+
+Environment Variables
+.env
+
+User Data
+This will ignore the /data folder and everything inside it, including users.csv
+/data
+
+Production
+/build
+
+Logs
+logs
+.log
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+Misc
+.DS_Store
