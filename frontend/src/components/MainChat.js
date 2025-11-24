@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import '../styles/MainChat.css';
-import { FaPaperPlane, FaMicrophone, FaRegStopCircle, FaVolumeUp } from 'react-icons/fa';
+// Added FaStop for the stop button
+import { FaPaperPlane, FaMicrophone, FaRegStopCircle, FaVolumeUp, FaStop } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
@@ -28,8 +29,11 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isListening, setIsListening] = useState(false);
+    // New state to track which message index is currently speaking
+    const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
+    
     const chatEndRef = useRef(null);
-    const userRegion = "IND"; // Hardcoded for India as per request. For a real app, this would be detected from IP.
+    const userRegion = "IND"; 
 
     const recognition = useMemo(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -40,6 +44,14 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
     }, []);
 
     useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [activeChat]);
+
+    // Cleanup speech when component unmounts or chat changes
+    useEffect(() => {
+        return () => {
+            synth.cancel();
+            setSpeakingMessageIndex(null);
+        };
+    }, [activeChatId]);
 
     useEffect(() => {
         if (!recognition) return;
@@ -55,21 +67,24 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
 
     const handleSend = async () => {
         if (!input.trim() || !activeChatId) return;
+        
+        // Stop any ongoing speech when sending a new message
+        synth.cancel();
+        setSpeakingMessageIndex(null);
+
         const userMessage = { role: 'user', parts: [{ text: input }] };
         updateChat(userMessage);
         const currentInput = input;
         setInput('');
         setIsLoading(true);
         setError('');
-        synth.cancel();
         
-        // FIX: Clean history before sending to API - only include 'role' and 'parts'
         const cleanedHistoryForApi = activeChat.map(msg => ({ role: msg.role, parts: msg.parts }));
         const chatHistoryForApi = [...cleanedHistoryForApi, userMessage];
 
         try {
             const response = await axios.post(`${API_URL}/api/chat`, { message: currentInput, history: chatHistoryForApi }, {
-                headers: { 'x-user-region': userRegion } // Send region to backend
+                headers: { 'x-user-region': userRegion } 
             });
             const botMessage = { 
                 role: 'model', 
@@ -87,17 +102,41 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
     const handleKeyPress = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
     const toggleListening = () => { if (!recognition) return; if (isListening) { recognition.stop(); } else { recognition.start(); } setIsListening(!isListening); };
 
-    const speak = (text) => {
-        if (synth.speaking) synth.cancel();
+    // Updated logic to toggle between Speak and Stop
+    const toggleSpeech = (text, index) => {
+        // If currently speaking THIS message, stop it
+        if (synth.speaking && speakingMessageIndex === index) {
+            synth.cancel();
+            setSpeakingMessageIndex(null);
+            return;
+        }
+
+        // If speaking something else or nothing, start fresh
+        synth.cancel();
+
         const utterance = new SpeechSynthesisUtterance(text);
         const voicePref = localStorage.getItem('botcure_voice_pref') || 'Female';
+        
         const findVoice = (gender) => {
             const englishVoices = voices.filter(v => v.lang.startsWith('en'));
             if (gender === 'Female') return englishVoices.find(v => v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google US English')) || englishVoices[0];
             if (gender === 'Male') return englishVoices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Google UK English Male')) || englishVoices[1] || englishVoices[0];
-            return englishVoices[0]; // Fallback
+            return englishVoices[0]; 
         };
+
         utterance.voice = findVoice(voicePref);
+
+        // Reset state when speech finishes naturally
+        utterance.onend = () => {
+            setSpeakingMessageIndex(null);
+        };
+
+        // Reset state if there is an error
+        utterance.onerror = () => {
+            setSpeakingMessageIndex(null);
+        };
+
+        setSpeakingMessageIndex(index);
         synth.speak(utterance);
     };
 
@@ -118,9 +157,16 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
                     <div key={index} className={`chat-message ${msg.role}`}>
                         <div className="message-bubble">
                             {msg.role === 'model' ? <MarkdownRenderer text={msg.parts[0].text} isCrisis={msg.crisisDetected} /> : msg.parts[0].text}
-                            {/* Do not show speak button for crisis messages */}
+                            
+                            {/* Only show speech controls for model messages that aren't crisis alerts */}
                             {msg.role === 'model' && !msg.crisisDetected && (
-                                <button className="speak-btn" onClick={() => speak(msg.parts[0].text)}><FaVolumeUp /></button>
+                                <button 
+                                    className="speak-btn" 
+                                    onClick={() => toggleSpeech(msg.parts[0].text, index)}
+                                    title={speakingMessageIndex === index ? "Stop Speaking" : "Read Aloud"}
+                                >
+                                    {speakingMessageIndex === index ? <FaStop /> : <FaVolumeUp />}
+                                </button>
                             )}
                         </div>
                     </div>
@@ -141,4 +187,3 @@ function MainChat({ user, activeChat, updateChat, activeChatId }) {
 }
 
 export default MainChat;
-
