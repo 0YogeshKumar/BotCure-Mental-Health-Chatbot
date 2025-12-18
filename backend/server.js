@@ -53,7 +53,8 @@ const transporter = nodemailer.createTransport({
 // --- Crisis Detection & Helplines ---
 const crisisKeywords = [
     'kill myself', 'suicide', 'want to die', 'end my life', 'no reason to live', 
-    'self-harm', 'harm myself', 'jump from', 'hang myself', 'take my life'
+    'self-harm', 'harm myself', 'jump from', 'hang myself', 'take my life', 
+    'die', 'death', 'kill'
 ];
 
 const isCrisisMessage = (message) => {
@@ -66,7 +67,7 @@ const getHelplineInfo = (region = 'default') => {
     if (region === 'IND') {
         return {
             text: "Please reach out for immediate help. India Helplines:",
-            numbers: ["Kiran Helpline: 1800-599-0019", "AASRA: +91-22-27546669"]
+            numbers: ["Kiran Helpline: 1800-599-0019", "AASRA: +91-22-27546669" ,"Bengaluru police’s suicide prevention helpline: 8277946600"]
         };
     }
     // Default / International Helplines
@@ -153,7 +154,7 @@ app.post('/api/chat', async (req, res) => {
         const helpline = getHelplineInfo(req.headers['x-user-region']); // Use region from header
         systemInstructionText = `You are a crisis intervention AI. Your only goal is to provide immediate, concise help. Acknowledge their pain in one sentence. Then, **IMMEDIATELY** provide the following helplines: ${helpline.numbers.join('; ')}. Do not provide any other information or options. Keep the entire message under 60 words. Be direct and urgent.`;
     } else {
-        systemInstructionText = `You are BotCure, an empathetic and supportive AI mental health guide. Your personality is calm, wise, and thoughtful. Your goal is to listen, offer comfort, and provide gentle guidance. ALWAYS respond in well-structured markdown. Use hyphens (-) for lists and double asterisks (**) for bolding. If the user expresses sadness, validate their feelings and gently ask what they might prefer to talk about or if they'd like a calming exercise, rather than a long monologue.`;
+        systemInstructionText = `You are BotCure, an empathetic and supportive AI mental health guide. Your personality is calm, wise, and thoughtful. Your goal is to listen, offer comfort, and provide gentle guidance. ALWAYS respond in well-structured markdown. Use hyphens (-) for lists and double asterisks (**) for bolding. If the user expresses sadness, anger, or anxiety validate their feelings and gently ask what they might prefer to talk about or if they'd like a calming exercise, rather than a long monologue.`;
     }
 
     const systemInstruction = { role: "user", parts: [{ text: systemInstructionText }] };

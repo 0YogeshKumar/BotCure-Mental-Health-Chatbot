@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import '../styles/Games.css';
 
-// --- Tic Tac Toe Game Component ---
+// --- Tic Tac Toe (Unchanged) ---
 const TicTacToe = ({ onBack }) => {
     const initialBoard = Array(9).fill(null);
     const [board, setBoard] = useState(initialBoard);
@@ -80,7 +80,7 @@ const TicTacToe = ({ onBack }) => {
     );
 };
 
-// --- Find The Pair (Memory Game) Component ---
+// --- Find The Pair (Unchanged) ---
 const MemoryGame = ({ onBack }) => {
     const emojis = useMemo(() => ['🧠', '❤️', '😊', '👍', '✨', '🧘', '☀️', '🌱'], []);
     const createShuffledDeck = useCallback(() => {
@@ -144,91 +144,266 @@ const MemoryGame = ({ onBack }) => {
     );
 };
 
-// --- Stress Buster (Hit the Buddy) Game ---
+// --- Stress Buster (Kick the Buddy Style) Game ---
 const StressBuster = ({ onBack }) => {
-    const [hitState, setHitState] = React.useState({ isHit: false, key: 0 });
-    const [hitCount, setHitCount] = React.useState(0);
-    const [selectedTool, setSelectedTool] = React.useState('hand');
-    const [bruises, setBruises] = React.useState([]);
+    const [hitState, setHitState] = useState({ isHit: false, key: 0 });
+    const [hitCount, setHitCount] = useState(0);
+    const [selectedTool, setSelectedTool] = useState('hand');
+    const [bruises, setBruises] = useState([]);
+    const [popups, setPopups] = useState([]);
+    const [uploadedFace, setUploadedFace] = useState(null);
+    
+    const fileInputRef = useRef(null);
+    const buddyRef = useRef(null);
+    
+    // Audio Context Setup
+    const audioContext = useMemo(() => new (window.AudioContext || window.webkitAudioContext)(), []);
 
-    const audioContext = React.useMemo(() => new (window.AudioContext || window.webkitAudioContext)(), []);
+    // 1. Realistic Slap Sound (White Noise)
+    const playSlap = useCallback(() => {
+        const bufferSize = audioContext.sampleRate * 0.1; // 0.1 seconds
+        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
 
-    const playSound = React.useCallback((tool) => {
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioContext.createBufferSource();
+        noise.buffer = buffer;
+        const gain = audioContext.createGain();
+        
+        noise.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        gain.gain.setValueAtTime(0.5, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        noise.start();
+    }, [audioContext]);
+
+    // 2. Scream Synthesis (Descending Sawtooth)
+    const playScream = useCallback(() => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.type = 'sawtooth';
+        // Start high pitch, drop quickly to low pitch
+        osc.frequency.setValueAtTime(800 + Math.random() * 200, audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.3);
+    }, [audioContext]);
+
+
+    // 3. Tool Sounds
+    const playToolSound = useCallback((tool) => {
+        // Always resume context on user interaction
+        if(audioContext.state === 'suspended') audioContext.resume();
+
+        if (tool === 'hand') {
+            playSlap();
+            return;
+        }
+
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
 
-        let freq, decay;
+        let freq, decay, type;
         switch (tool) {
-            case 'bat': freq = 150; decay = 0.2; oscillator.type = 'square'; break;
-            case 'stone': freq = 100; decay = 0.3; oscillator.type = 'sawtooth'; break;
-            case 'ball': freq = 300; decay = 0.15; oscillator.type = 'triangle'; break;
-            default: freq = 500; decay = 0.1; oscillator.type = 'sine'; break;
+            case 'bat': freq = 100; decay = 0.1; type = 'sawtooth'; break; // Thud
+            case 'stone': freq = 60; decay = 0.2; type = 'square'; break; // Heavy
+            case 'ball': freq = 300; decay = 0.1; type = 'triangle'; break; // Boing
+            default: freq = 150; decay = 0.1; type = 'sine'; break;
         }
 
+        oscillator.type = type;
         oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(10, audioContext.currentTime + decay);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + decay);
         oscillator.start();
         oscillator.stop(audioContext.currentTime + decay);
-    }, [audioContext]);
+    }, [audioContext, playSlap]);
 
     const handleHit = (e) => {
-        const svgRect = e.currentTarget.getBoundingClientRect();
-        const x = (e.clientX - svgRect.left) * (200 / svgRect.width); // Scale coordinates to SVG viewbox
-        const y = (e.clientY - svgRect.top) * (240 / svgRect.height);
+        const rect = e.currentTarget.getBoundingClientRect();
+        
+        // Coordinates for bruises
+        const svgX = (e.clientX - rect.left) * (200 / rect.width);
+        const svgY = (e.clientY - rect.top) * (300 / rect.height);
 
-        setBruises(prev => [...prev, { x, y, key: Date.now() }]);
+        // Coordinates for popups
+        const popupX = e.clientX - rect.left;
+        const popupY = e.clientY - rect.top;
+
+        setBruises(prev => [...prev.slice(-15), { x: svgX, y: svgY, key: Date.now() }]);
+        
+        const popupText = ['POW!', 'BAM!', 'OUCH!', 'THWACK!', 'AGH!'][Math.floor(Math.random() * 5)];
+        const newPopup = { id: Date.now(), x: popupX, y: popupY, text: popupText };
+        setPopups(prev => [...prev, newPopup]);
+        
+        setTimeout(() => {
+             setPopups(prev => prev.filter(p => p.id !== newPopup.id));
+        }, 600);
+
         setHitState({ isHit: true, key: Math.random() });
         setHitCount(c => c + 1);
-        playSound(selectedTool);
+        
+        // Play Sound + Scream
+        playToolSound(selectedTool);
+        // 50% chance to scream on hit
+        if (Math.random() > 0.5) {
+            playScream();
+        }
 
         setTimeout(() => {
-            setHitState({ isHit: false, key: 0 });
-        }, 300);
+            setHitState(prev => ({ ...prev, isHit: false }));
+        }, 200); // Shorter duration for snappier feel
     };
     
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setUploadedFace(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const resetGame = () => {
         setHitCount(0);
         setBruises([]);
+        setPopups([]);
+        setUploadedFace(null);
     };
 
     return (
         <div className="game-container stress-buster">
             <button onClick={onBack} className="back-btn">← Back to Games</button>
             <h3 className="game-title">Stress Buster</h3>
-            <p className="game-subtitle">Select a tool and click the buddy.</p>
+            <p className="game-subtitle">Choose a weapon. Upload a photo if you like!</p>
 
-            <div className="tool-selection">
-                <button onClick={() => setSelectedTool('hand')} className={selectedTool === 'hand' ? 'active' : ''}>✋ Hand</button>
-                <button onClick={() => setSelectedTool('bat')} className={selectedTool === 'bat' ? 'active' : ''}>🏏 Bat</button>
-                <button onClick={() => setSelectedTool('stone')} className={selectedTool === 'stone' ? 'active' : ''}>🪨 Stone</button>
-                <button onClick={() => setSelectedTool('ball')} className={selectedTool === 'ball' ? 'active' : ''}>⚾ Ball</button>
+            <div className="controls-row">
+                <div className="tool-selection">
+                    <button onClick={() => setSelectedTool('hand')} className={selectedTool === 'hand' ? 'active' : ''}>✋ Slap</button>
+                    <button onClick={() => setSelectedTool('bat')} className={selectedTool === 'bat' ? 'active' : ''}>🏏 Bat</button>
+                    <button onClick={() => setSelectedTool('stone')} className={selectedTool === 'stone' ? 'active' : ''}>🪨 Rock</button>
+                    <button onClick={() => setSelectedTool('ball')} className={selectedTool === 'ball' ? 'active' : ''}>⚾ Ball</button>
+                </div>
+                
+                <div className="extra-controls">
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleImageUpload} 
+                        accept="image/*" 
+                        style={{ display: 'none' }} 
+                    />
+                    <button className="upload-btn" onClick={() => fileInputRef.current.click()}>📸 Add Face</button>
+                </div>
             </div>
             
-            <div className="buddy-area" data-tool={selectedTool}>
+            <div className="buddy-area" data-tool={selectedTool} onClick={handleHit} ref={buddyRef}>
                 {hitState.isHit && selectedTool === 'bat' && <div key={hitState.key} className="tool-animation bat">🏏</div>}
                 {hitState.isHit && selectedTool === 'stone' && <div key={hitState.key} className="tool-animation stone">🪨</div>}
                 {hitState.isHit && selectedTool === 'ball' && <div key={hitState.key} className="tool-animation ball">⚾</div>}
+                
+                {popups.map(p => (
+                    <div key={p.id} className="hit-effect" style={{ left: p.x, top: p.y }}>{p.text}</div>
+                ))}
 
-                <svg viewBox="0 0 200 240" className={`buddy-svg ${hitState.isHit ? 'hit' : ''}`} onClick={handleHit}>
-                    <g className="buddy-body">
-                        <ellipse cx="100" cy="170" rx="70" ry="60" fill="#a7f3d0" stroke="#065f46" strokeWidth="2" />
-                        <circle cx="100" cy="80" r="60" fill="#a7f3d0" stroke="#065f46" strokeWidth="2" />
-                        <g>
-                            <circle cx="80" cy="75" r="8" fill="white" />
-                            <circle cx="120" cy="75" r="8" fill="white" />
-                            <circle cx="82" cy="77" r="4" fill="black" />
-                            <circle cx="118" cy="77" r="4" fill="black" />
+                <svg viewBox="0 0 200 300" className={`buddy-svg ${hitState.isHit ? 'hit' : ''}`}>
+                    <defs>
+                        {/* Clip path for the user uploaded image to be circular */}
+                        <clipPath id="face-clip">
+                             <circle cx="100" cy="70" r="48" />
+                        </clipPath>
+                    </defs>
+
+                    <g className="buddy-group">
+                        {/* Legs */}
+                        <path d="M 70 200 L 70 280 A 10 10 0 0 0 90 280 L 90 200" className="buddy-body-part" />
+                        <path d="M 130 200 L 130 280 A 10 10 0 0 0 110 280 L 110 200" className="buddy-body-part" />
+                        
+                        {/* Arms */}
+                        <path d="M 50 120 L 20 160 A 10 10 0 0 0 40 170 L 60 130" className="buddy-body-part" />
+                        <path d="M 150 120 L 180 160 A 10 10 0 0 1 160 170 L 140 130" className="buddy-body-part" />
+
+                        {/* Body */}
+                        <ellipse cx="100" cy="150" rx="60" ry="70" className="buddy-body-part" />
+                        <path d="M 100 120 L 100 180" stroke="#8d6e63" strokeWidth="2" strokeDasharray="5,5" />
+                        <path d="M 70 150 L 130 150" stroke="#8d6e63" strokeWidth="2" strokeDasharray="5,5" />
+
+                        {/* Head */}
+                        <circle cx="100" cy="70" r="50" className="buddy-body-part" fill={uploadedFace ? "#fff" : "#e6cba5"}/>
+                        
+                        {/* Face Group */}
+                        <g className="buddy-face-group">
+                            {uploadedFace ? (
+                                /* User Uploaded Face */
+                                <image 
+                                    href={uploadedFace} 
+                                    x="50" y="20" 
+                                    width="100" height="100" 
+                                    clipPath="url(#face-clip)"
+                                    preserveAspectRatio="xMidYMid slice"
+                                />
+                            ) : (
+                                /* Default Vector Face */
+                                <>
+                                    {/* Eyes Change on Hit */}
+                                    {hitState.isHit ? (
+                                        // Pain Eyes (Squint/Closed)
+                                        <g>
+                                            <path d="M 70 60 L 90 60" stroke="#3e2723" strokeWidth="3" />
+                                            <path d="M 75 55 L 85 65" stroke="#3e2723" strokeWidth="2" />
+                                            <path d="M 85 55 L 75 65" stroke="#3e2723" strokeWidth="2" />
+
+                                            <path d="M 110 60 L 130 60" stroke="#3e2723" strokeWidth="3" />
+                                            <path d="M 115 55 L 125 65" stroke="#3e2723" strokeWidth="2" />
+                                            <path d="M 125 55 L 115 65" stroke="#3e2723" strokeWidth="2" />
+                                        </g>
+                                    ) : (
+                                        // Happy Eyes (Button style)
+                                        <g>
+                                            <circle cx="80" cy="60" r="8" fill="#3e2723" />
+                                            <circle cx="80" cy="60" r="2" fill="#d7ccc8" />
+                                            <circle cx="78" cy="58" r="1" fill="black" />
+                                            <circle cx="82" cy="62" r="1" fill="black" />
+
+                                            <circle cx="120" cy="60" r="8" fill="#3e2723" />
+                                            <circle cx="120" cy="60" r="2" fill="#d7ccc8" />
+                                            <circle cx="118" cy="62" r="1" fill="black" />
+                                            <circle cx="122" cy="58" r="1" fill="black" />
+                                        </g>
+                                    )}
+                                    
+                                    {/* Mouth Changes on Hit */}
+                                    {hitState.isHit ? (
+                                        // Pain Mouth (Open O)
+                                        <circle cx="100" cy="95" r="12" fill="#3e2723" />
+                                    ) : (
+                                        // Happy Smile
+                                        <path d="M 80 90 Q 100 110 120 90" stroke="#3e2723" strokeWidth="4" fill="none" strokeLinecap="round" />
+                                    )}
+                                </>
+                            )}
                         </g>
-                        {hitState.isHit ? (
-                            <circle cx="100" cy="105" r="10" fill="black" />
-                        ) : (
-                            <path d="M 80 105 Q 100 120 120 105" stroke="black" strokeWidth="3" fill="none" />
-                        )}
+
+                        {/* Bruises */}
                         {bruises.map(b => (
-                            <circle key={b.key} cx={b.x} cy={b.y} r="8" fill="#d946ef" opacity="0.6" />
+                            <circle key={b.key} cx={b.x} cy={b.y} r={Math.random() * 8 + 5} className="bruise" />
                         ))}
                     </g>
                 </svg>
@@ -266,4 +441,3 @@ function Games() {
 }
 
 export default Games;
-

@@ -38,7 +38,13 @@
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.game-selection button:active, .reset-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .status {
@@ -51,23 +57,26 @@
     position: absolute;
     top: 20px;
     left: 20px;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 10px 18px;
+    border-radius: 20px;
     cursor: pointer;
-    z-index: 10;
+    z-index: 100;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 /* --- Dark Theme Default Styles --- */
 .games-page h2, .game-title { color: var(--primary-color-dark); }
 .games-page p, .game-subtitle, .status { color: var(--text-secondary-dark); }
 .game-selection button, .reset-btn { background-color: var(--primary-color-dark); color: #FFFFFF; }
-.back-btn { background-color: var(--panel-bg-dark); border: 1px solid var(--border-dark); color: var(--text-primary-dark); }
+.back-btn { background-color: #333; color: #fff; }
 
 /* --- Light Theme Overrides --- */
 body.light .games-page h2, body.light .game-title { color: var(--primary-color-light); }
 body.light .games-page p, body.light .game-subtitle, body.light .status { color: var(--text-secondary-light); }
 body.light .game-selection button, body.light .reset-btn { background-color: var(--primary-color-light); color: #FFFFFF; }
-body.light .back-btn { background-color: var(--panel-bg-light); border-color: var(--border-light); color: var(--text-primary-light); }
+body.light .back-btn { background-color: #fff; color: #333; border: 1px solid #ddd; }
 
 
 /* --- Tic-Tac-Toe Specific Styles --- */
@@ -110,13 +119,12 @@ body.light .tictactoe .square {
 body.light .tictactoe .square:hover { background-color: #e9ecef; }
 
 
-/* --- Find The Pair Specific Styles (CORRECTED) --- */
+/* --- Find The Pair Specific Styles --- */
 .memory-grid { 
     display: grid; 
     grid-template-columns: repeat(4, 1fr); 
     gap: 15px; 
     width: clamp(300px, 90vw, 400px); 
-    /* This ensures the grid is always a perfect square */
     aspect-ratio: 1 / 1;
 }
 .card { 
@@ -172,34 +180,175 @@ body.light .card-back {
 }
 
 
-/* --- Stress Buster Styles --- */
-.stress-buster .tool-selection { display: flex; gap: 15px; margin-bottom: 25px; }
-.stress-buster .tool-selection button { padding: 10px 20px; border-radius: 8px; font-weight: normal; }
-.buddy-area { position: relative; width: 200px; height: 240px; margin-bottom: 20px; cursor: pointer; }
-.buddy-svg { width: 100%; height: 100%; }
-.buddy-svg .buddy-body { transition: transform 0.3s ease-out; }
-.buddy-svg.hit .buddy-body-group { animation: recoil 0.3s ease-out; }
-@keyframes recoil { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(0, 5px) scale(0.98); } }
-.tool-animation { position: absolute; font-size: 4rem; pointer-events: none; z-index: 10; }
-.tool-animation.bat { top: 50%; left: -100px; animation: swing-bat 0.3s ease-out forwards; }
-.tool-animation.stone { top: 50%; left: -100px; animation: throw-stone 0.2s linear forwards; }
-.tool-animation.ball { top: 120%; left: 40%; animation: throw-ball 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards; }
-@keyframes swing-bat { 0% { transform: translateX(0) rotate(-45deg); opacity: 1; } 100% { transform: translateX(300px) rotate(45deg); opacity: 0; } }
-@keyframes throw-stone { 0% { transform: translateX(0) scale(1); opacity: 1; } 100% { transform: translateX(150px) scale(0.5); opacity: 0; } }
-@keyframes throw-ball { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-200px); opacity: 0; } }
+/* --- Stress Buster "Kick the Buddy" Style --- */
 
-/* Dark Theme */
-.stress-buster .tool-selection button { background-color: var(--panel-bg-dark); border: 2px solid var(--border-dark); color: var(--text-primary-dark); }
-.stress-buster .tool-selection button.active { border-color: var(--primary-color-dark); color: var(--primary-color-dark); }
-.stress-buster .buddy-svg .buddy-body { fill: var(--primary-color-dark); }
-.stress-buster .buddy-svg .buddy-eyes, .stress-buster .buddy-svg .buddy-mouth { stroke: var(--bg-dark); }
-.stress-buster .buddy-svg .buddy-mouth-hit { fill: var(--bg-dark); }
+.stress-buster {
+    background: radial-gradient(circle at center, #d8ba88 0%, #c4a472 60%, #a68558 100%);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
 
+.stress-buster .game-title, 
+.stress-buster .game-subtitle,
+.stress-buster .status {
+    color: #5d4037 !important;
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+}
 
-/* Light Theme */
-body.light .stress-buster .tool-selection button { background-color: var(--panel-bg-light); border-color: var(--border-light); color: var(--text-primary-light); }
-body.light .stress-buster .tool-selection button.active { border-color: var(--primary-color-light); color: var(--primary-color-light); }
-body.light .stress-buster .buddy-svg .buddy-body { fill: var(--primary-color-light); }
-body.light .stress-buster .buddy-svg .buddy-eyes, body.light .stress-buster .buddy-svg .buddy-mouth { stroke: var(--bg-light); }
-body.light .stress-buster .buddy-svg .buddy-mouth-hit { fill: var(--bg-light); }
+.controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    z-index: 10;
+}
 
+.stress-buster .tool-selection, .stress-buster .extra-controls { 
+    display: flex; 
+    gap: 10px; 
+    background: rgba(255, 255, 255, 0.4);
+    padding: 8px 12px;
+    border-radius: 50px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+.stress-buster button { 
+    padding: 10px 15px; 
+    border-radius: 20px; 
+    font-weight: bold; 
+    border: none;
+    background: rgba(255,255,255,0.7);
+    color: #5d4037;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.stress-buster button.active { 
+    background: #ff7043;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.upload-btn {
+    background: #42a5f5 !important;
+    color: white !important;
+}
+.upload-btn:hover {
+    background: #2196f3 !important;
+}
+
+/* The Stage Area */
+.buddy-area { 
+    position: relative; 
+    width: 300px; 
+    height: 350px; 
+    margin: 20px 0; 
+    cursor: crosshair;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.buddy-svg { 
+    width: 100%; 
+    height: 100%; 
+    overflow: visible;
+    filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.3));
+    transition: transform 0.1s;
+}
+
+.buddy-body-part {
+    fill: #e6cba5;
+    stroke: #8d6e63;
+    stroke-width: 3;
+}
+
+/* Hit Animation */
+.buddy-svg.hit {
+    animation: ragdoll-shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.buddy-svg.hit .buddy-face-group {
+    animation: face-wince 0.2s alternate 2;
+}
+
+@keyframes ragdoll-shake {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(-5px, 5px) rotate(-5deg) scale(0.95); }
+    50% { transform: translate(5px, -5px) rotate(5deg) scale(0.95); }
+    75% { transform: translate(-5px, 5px) rotate(-5deg) scale(1.02); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+@keyframes face-wince {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(5px) scaleY(0.9); }
+}
+
+.hit-effect {
+    position: absolute;
+    pointer-events: none;
+    font-family: 'Comic Sans MS', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: #d32f2f;
+    text-shadow: 2px 2px 0px white;
+    z-index: 20;
+    animation: pop-fade 0.6s ease-out forwards;
+}
+
+@keyframes pop-fade {
+    0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; }
+    50% { transform: translate(-50%, -100%) scale(1.2) rotate(10deg); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(1) rotate(0deg); opacity: 0; }
+}
+
+.tool-animation { 
+    position: absolute; 
+    font-size: 5rem; 
+    pointer-events: none; 
+    z-index: 15; 
+}
+.tool-animation.bat { 
+    top: 20%; left: -20px; 
+    animation: smash-bat 0.3s ease-in forwards; 
+}
+.tool-animation.stone { 
+    top: 10%; left: 50%; 
+    animation: drop-stone 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; 
+}
+.tool-animation.ball { 
+    top: 50%; left: -50px; 
+    animation: fast-ball 0.2s linear forwards; 
+}
+
+@keyframes smash-bat { 
+    0% { transform: rotate(-45deg) translateX(-50px); opacity: 1; } 
+    50% { transform: rotate(10deg) translateX(0px); opacity: 1; }
+    100% { transform: rotate(-45deg) translateX(50px); opacity: 0; } 
+}
+@keyframes drop-stone { 
+    0% { transform: translateY(-200px) scale(1.5); opacity: 1; } 
+    80% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(10px) scale(1); opacity: 0; } 
+}
+@keyframes fast-ball { 
+    0% { transform: translateX(0) scale(0.5); opacity: 1; } 
+    100% { transform: translateX(300px) scale(1.2); opacity: 0; } 
+}
+
+.bruise {
+    fill: #5d4037;
+    opacity: 0.4;
+    animation: bruise-fade 3s forwards;
+}
+@keyframes bruise-fade {
+    0% { opacity: 0.6; }
+    100% { opacity: 0.2; }
+}
